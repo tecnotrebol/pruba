@@ -159,8 +159,8 @@ header.raised{box-shadow:0 8px 24px rgba(20,35,28,.08)}
 .mosaic.simple{aspect-ratio:auto;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none}
 .mosaic.simple .dt{grid-column:auto;grid-row:auto;aspect-ratio:1.5;justify-content:flex-end}
 .mosaic.simple .dtt{font-size:max(.95rem,5.2cqw)}
+.grid>.descubre{grid-column:1/-1;margin:14px 0 8px}
 @media(min-width:720px){
-  .descubre{max-width:880px;margin-left:auto;margin-right:auto}
   .mosaic{aspect-ratio:2.15;gap:12px}
   .dt{border-radius:20px}
 }
@@ -287,6 +287,13 @@ footer li i{color:#7fe3b4;width:16px;text-align:center}
 
   <section class="catcards" id="catcards" aria-label="Categorías"></section>
 
+  <nav class="quick" aria-label="Accesos rápidos">
+    <a href="https://wa.me/584244649564" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i>Chat</a>
+    <a href="https://wa.me/584244649564?text=Hola%20Tecno%20Trebol%2C%20quiero%20informaci%C3%B3n%20sobre%20el%20delivery" target="_blank" rel="noopener"><i class="fas fa-truck"></i>Delivery</a>
+    <a href="https://maps.google.com/?cid=6273201830718904491&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNl" target="_blank" rel="noopener"><i class="fas fa-map-marker-alt"></i>Tienda</a>
+    <a href="https://beacons.ai/tecnotrebol" target="_blank" rel="noopener"><i class="fas fa-globe"></i>Redes</a>
+  </nav>
+
   <section class="promos" id="promos" hidden>
     <h2>Promo Tecno Trebol</h2>
     <div class="pwrap">
@@ -297,17 +304,7 @@ footer li i{color:#7fe3b4;width:16px;text-align:center}
     <div class="pdots" id="pDots"></div>
   </section>
 
-  <section class="descubre" id="descubre" hidden>
-    <h2>Descubre</h2>
-    <div class="mosaic" id="mosaic"></div>
-  </section>
 
-  <nav class="quick" aria-label="Accesos rápidos">
-    <a href="https://wa.me/584244649564" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i>Chat</a>
-    <a href="https://wa.me/584244649564?text=Hola%20Tecno%20Trebol%2C%20quiero%20informaci%C3%B3n%20sobre%20el%20delivery" target="_blank" rel="noopener"><i class="fas fa-truck"></i>Delivery</a>
-    <a href="https://maps.google.com/?cid=6273201830718904491&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNl" target="_blank" rel="noopener"><i class="fas fa-map-marker-alt"></i>Tienda</a>
-    <a href="https://beacons.ai/tecnotrebol" target="_blank" rel="noopener"><i class="fas fa-globe"></i>Redes</a>
-  </nav>
 
   <div class="top-line" id="catalogo">
     <div class="l">
@@ -324,6 +321,10 @@ footer li i{color:#7fe3b4;width:16px;text-align:center}
   <div id="productos" class="grid" aria-live="polite">
     <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
   </div>
+  <section class="descubre" id="descubre" hidden>
+    <h2>Descubre</h2>
+    <div class="mosaic" id="mosaic"></div>
+  </section>
 </main>
 
 <footer>
@@ -458,7 +459,19 @@ $("catcards").addEventListener("click", e => {
 $("btnTodos").addEventListener("click", () => { catActiva = ""; pintarCatCards(); buscarProducto(); });
 
 // ---------- MOSTRAR ----------
+// Pone "Descubre" debajo de la tercera fila de productos (según las columnas que haya en pantalla)
+function colocarDescubre() {
+  const g = $("productos"), d = $("descubre");
+  const cards = g.querySelectorAll(".card");
+  const cols = getComputedStyle(g).gridTemplateColumns.split(" ").length || 1;
+  const n = cols * 3;
+  if (cards.length > n) cards[n - 1].after(d); else g.appendChild(d);
+}
+let _rz;
+window.addEventListener("resize", () => { clearTimeout(_rz); _rz = setTimeout(colocarDescubre, 150); });
+
 function mostrar(lista, hayFiltro) {
+  $("productos").after($("descubre")); // lo saca de la lista antes de repintarla
   const visibles = lista.filter(p => p.visible !== false);
   $("contador").textContent = visibles.length ? visibles.length + (visibles.length === 1 ? " producto" : " productos") : "";
   $("tituloLista").textContent = catActiva || "Productos";
@@ -468,6 +481,7 @@ function mostrar(lista, hayFiltro) {
     $("productos").innerHTML = hayFiltro
       ? '<div class="empty"><i class="fas fa-search"></i><b>No encontramos ese producto</b>Prueba con otra palabra o escríbenos por WhatsApp.</div>'
       : '<div class="empty"><i class="fas fa-box-open"></i><b>Aún no hay productos</b>Vuelve pronto.</div>';
+    colocarDescubre();
     return;
   }
 
@@ -487,6 +501,7 @@ function mostrar(lista, hayFiltro) {
       </div>
     </article>`;
   }).join("");
+  colocarDescubre();
 }
 
 $("productos").addEventListener("click", e => {
